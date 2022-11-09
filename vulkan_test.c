@@ -627,6 +627,8 @@ vulkan_helper_test_semaphores_interop(struct vulkan_helper *vk_helper)
 		vkWaitForFences(vk_helper -> vk_device, 1, &fence, VK_TRUE, UINT64_MAX);
 		/* TODO(Dino): INSERT CODE HERE TO CHECK IF THE INTEROP WORKS*/
 
+		printf("Finished copy, semaphores signaled!\n");
+
 		vkDestroyFence(vk_helper -> vk_device, fence, NULL);
 		vkFreeCommandBuffers(vk_helper -> vk_device, vk_helper -> vk_command_pool_transfer, 1, &copy_command_buffer);
 	}
