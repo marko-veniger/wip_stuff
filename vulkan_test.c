@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include <vulkan/vulkan.h>
 
@@ -369,7 +370,7 @@ vulkan_helper_command_pools_init(struct vulkan_helper *vk_helper)
 {
 	VkCommandPoolCreateInfo command_pool_create_info = {};
 	command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	command_pool_create_info.queueFamilyIndex = vk_helper -> vk_queue_compute;
+	command_pool_create_info.queueFamilyIndex = vk_helper -> queues.compute_family;
 	command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	vkCreateCommandPool(vk_helper -> vk_device, &command_pool_create_info, NULL, &(vk_helper -> vk_command_pool_compute));
 	
@@ -377,7 +378,7 @@ vulkan_helper_command_pools_init(struct vulkan_helper *vk_helper)
 	{
 		VkCommandPoolCreateInfo command_pool_create_info = {};
 		command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		command_pool_create_info.queueFamilyIndex = vk_helper -> vk_queue_transfer;
+		command_pool_create_info.queueFamilyIndex = vk_helper -> queues.transfer_family;
 		command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		vkCreateCommandPool(vk_helper -> vk_device, &command_pool_create_info, NULL, &(vk_helper -> vk_command_pool_transfer));
 	}
@@ -391,10 +392,10 @@ vulkan_helper_command_pools_init(struct vulkan_helper *vk_helper)
 int
 vulkan_helper_command_pools_cleanup(struct vulkan_helper *vk_helper)
 {
-	vkDestroyCommandPool(vk_helper -> vk_device, vk_helper -> vk_command_pool_compute);
+	vkDestroyCommandPool(vk_helper -> vk_device, vk_helper -> vk_command_pool_compute, NULL);
 	if(!(vk_helper -> flags & VULKAN_HELPER_FLAGS_ONE_QUEUE_FAMILY_BIT))
 	{
-		vkDestroyCommandPool(vk_helper -> vk_device, vk_helper -> vk_command_pool_transfer);
+		vkDestroyCommandPool(vk_helper -> vk_device, vk_helper -> vk_command_pool_transfer, NULL);
 	}
 	return 0;
 }
@@ -514,7 +515,7 @@ vulkan_helper_init(struct vulkan_helper *vk_helper, int flags)
 	return 0;
 }
 
-void
+int
 vulkan_helper_cleanup(struct vulkan_helper *vk_helper)
 {
 	vulkan_helper_buffer_cleanup(vk_helper);
@@ -627,7 +628,7 @@ vulkan_helper_test_semaphores_interop(struct vulkan_helper *vk_helper)
 		/* TODO(Dino): INSERT CODE HERE TO CHECK IF THE INTEROP WORKS*/
 
 		vkDestroyFence(vk_helper -> vk_device, fence, NULL);
-		vkFreeCommandBuffers(vk_helper -> vk_device, commandPool, 1, &copy_command_buffer);
+		vkFreeCommandBuffers(vk_helper -> vk_device, vk_helper -> vk_command_pool_transfer, 1, &copy_command_buffer);
 	}
 	
 	return 0;
