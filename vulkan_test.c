@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <vulkan/vulkan.h>
 
@@ -17,6 +18,10 @@
 const char *requested_extensions[] = 
 {
 	VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+};
+
+const char *required_device_extensions[] = 
+{
 };
 
 const char *requested_validation_layers[] = {
@@ -65,7 +70,7 @@ vulkan_helper_extension_available(const char * extension_name)
 	
 	for(i = 0; i < extension_count; i++)
 	{
-		if(strcmp(extension_name, (char *) extensions[i].extensionName) == 0)
+		if(strcmp(extension_name, extensions[i].extensionName) == 0)
 		{
 			return 1;
 		}
@@ -327,7 +332,7 @@ vulkan_helper_device_init(struct vulkan_helper *vk_helper)
 	logical_device_create_info.pQueueCreateInfos = queue_create_infos;
 	/* create only one queue if it supports both compue and transfer */
 	int is_same_queue = vk_helper -> queues.compute_family == vk_helper -> queues.transfer_family;
-	logical_device_create_info.queueCreateInfoCount = vk_helper -> is_same_queue ? 1 : 2;
+	logical_device_create_info.queueCreateInfoCount = is_same_queue ? 1 : 2;
 	if(is_same_queue)
 	{
 		vk_helper -> flags |= VULKAN_HELPER_FLAGS_ONE_QUEUE_FAMILY_BIT;
@@ -610,12 +615,12 @@ vulkan_helper_test_semaphores_interop(struct vulkan_helper *vk_helper)
 		
 		VkFenceCreateInfo fence_create_info = {};
 		fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fence_create_info.flags = VK_FLAGS_NONE;
+		fence_create_info.flags = 0;
 		VkFence fence;
 		vkCreateFence(vk_helper -> vk_device, &fence_create_info, NULL, &fence);
 
 		// Submit to the queue
-		vkQueueSubmit(queue, 1, &submit_info, fence);
+		vkQueueSubmit(vk_helper -> vk_queue_transfer, 1, &submit_info, fence);
 		
 		/* THIS FENCE WAITS UNTILL THE SUBMITET COMMAND QUEUE IS DONE */
 		vkWaitForFences(vk_helper -> vk_device, 1, &fence, VK_TRUE, UINT64_MAX);
