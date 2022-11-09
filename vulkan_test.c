@@ -36,8 +36,8 @@ struct vulkan_helper
 	VkInstance vk_instance;
 	VkPhysicalDevice vk_physical_device;
 	VkDevice vk_device;
-	VkDebugUtilsMessengerEXT vk_debug_messenger
-	vk_helper_device_queues queues;
+	VkDebugUtilsMessengerEXT vk_debug_messenger;
+	struct vk_helper_device_queues queues;
 	VkQueue vk_queue_compute;
 	VkQueue vk_queue_transfer;
 	VkCommandPool vk_command_pool_compute, vk_command_pool_transfer;
@@ -247,7 +247,7 @@ vulkan_helper_rate_device(const VkPhysicalDevice p_dev)
 	
 	struct vk_helper_device_queues queues = vulkan_helper_find_queue_families(p_dev);
 	
-	if(!((queues & VK_QUEUE_COMPUTE_BIT) && (queues & VK_QUEUE_TRANSFER_BIT)))
+	if(!((queues.family_flags & VK_QUEUE_COMPUTE_BIT) && (queues.family_flags & VK_QUEUE_TRANSFER_BIT)))
 	{
 		return -1;
 	}
