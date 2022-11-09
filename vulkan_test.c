@@ -65,7 +65,7 @@ vulkan_helper_extension_available(const char * extension_name)
 	
 	for(i = 0; i < extension_count; i++)
 	{
-		if(strcmp(extension_name, extensions[i].extensionName) == 0)
+		if(strcmp(extension_name, (char *) extensions[i].extensionName) == 0)
 		{
 			return 1;
 		}
@@ -259,7 +259,7 @@ vulkan_helper_rate_device(const VkPhysicalDevice p_dev)
 	
 	if(device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 	{
-		rating += 2 * 1024 * 1024 * 1024;
+		rating += 2 * 1024 * 1024;
 	}
 	
 	rating += device_properties.limits.maxComputeSharedMemorySize;
@@ -268,7 +268,7 @@ vulkan_helper_rate_device(const VkPhysicalDevice p_dev)
 }
 
 int
-vulkan_helper_device_init(vulkan_helper *vk_helper)
+vulkan_helper_device_init(struct vulkan_helper *vk_helper)
 {
 	int i;
 	uint32_t device_count = 0;
@@ -353,14 +353,14 @@ vulkan_helper_device_init(vulkan_helper *vk_helper)
 }
 
 int
-vulkan_helper_device_cleanup(vulkan_helper *vk_helper)
+vulkan_helper_device_cleanup(struct vulkan_helper *vk_helper)
 {
 	vkDestroyDevice(vk_helper -> vk_device, NULL);
 	return 0;
 }
 
 int
-vulkan_helper_command_pools_init(vulkan_helper *vk_helper)
+vulkan_helper_command_pools_init(struct vulkan_helper *vk_helper)
 {
 	VkCommandPoolCreateInfo command_pool_create_info = {};
 	command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -384,7 +384,7 @@ vulkan_helper_command_pools_init(vulkan_helper *vk_helper)
 }
 
 int
-vulkan_helper_command_pools_cleanup(vulkan_helper *vk_helper)
+vulkan_helper_command_pools_cleanup(struct vulkan_helper *vk_helper)
 {
 	vkDestroyCommandPool(vk_helper -> vk_device, vk_helper -> vk_command_pool_compute);
 	if(!(vk_helper -> flags & VULKAN_HELPER_FLAGS_ONE_QUEUE_FAMILY_BIT))
@@ -395,7 +395,7 @@ vulkan_helper_command_pools_cleanup(vulkan_helper *vk_helper)
 }
 
 VkResult
-vulkan_helper_create_buffer(vulkan_helper *vk_helper, VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkBuffer *buffer, VkDeviceMemory *memory, VkDeviceSize size, void *data)
+vulkan_helper_create_buffer(struct vulkan_helper *vk_helper, VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkBuffer *buffer, VkDeviceMemory *memory, VkDeviceSize size, void *data)
 {
 	VkBufferCreateInfo buffer_create_info = {}; 
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -444,7 +444,7 @@ vulkan_helper_create_buffer(vulkan_helper *vk_helper, VkBufferUsageFlags usage_f
 
 
 int
-vulkan_helper_buffer_cleanup(vulkan_helper *vk_helper)
+vulkan_helper_buffer_cleanup(struct vulkan_helper *vk_helper)
 {
 	if(!(vk_helper -> flags & VULKAN_HELPER_BUFFERS_ALLOCATED_BIT)) return 0;
 	
@@ -527,7 +527,7 @@ vulkan_helper_cleanup(struct vulkan_helper *vk_helper)
 	TODO(Dino): Most of the work should be done in this function
 */
 int
-vulkan_helper_test_semaphores_interop(vulkan_helper *vk_helper)
+vulkan_helper_test_semaphores_interop(struct vulkan_helper *vk_helper)
 {
 	int i;
 	vk_helper -> buffer_size = BUFFER_ELEMENTS * sizeof(uint32_t);
@@ -632,7 +632,7 @@ vulkan_helper_test_semaphores_interop(vulkan_helper *vk_helper)
 int
 main(int argc, char *argv[])
 {
-	vulkan_helper helper = {};
+	struct vulkan_helper helper = {};
 	vulkan_helper_init(&helper, VULKAN_HELPER_FLAGS_ENABLE_VALIDATION_LAYERS_BIT);
 	
 	vulkan_helper_test_semaphores_interop(&helper);
